@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@nestjs/config": "^1.1.5",
-    "@nestjs/jwt": "^11.0.2",
-    "@nestjs/typeorm": "^11.0.1",
-    "pg": "^8.20.0",
-    "typeorm": "^0.3.28"
-  }
-}

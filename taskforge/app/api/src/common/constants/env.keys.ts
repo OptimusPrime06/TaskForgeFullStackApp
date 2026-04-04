@@ -1,0 +1,18 @@
+
+export enum EnvKeys {
+    // Database
+    DB_HOST = 'DB_HOST',
+    DB_PORT = 'DB_PORT',
+    DB_USERNAME = 'DB_USERNAME',
+    DB_PASSWORD = 'DB_PASSWORD',
+    DB_NAME = 'DB_NAME',
+
+    // JWT
+    JWT_SECRET = 'JWT_SECRET',
+    JWT_EXPIRES_IN = 'JWT_EXPIRES_IN',
+    JWT_REFRESH_SECRET = 'JWT_REFRESH_SECRET',
+    JWT_REFRESH_EXPIRES_IN = 'JWT_REFRESH_EXPIRES_IN',
+
+    // App
+    PORT = 'PORT',
+}

@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Get,
+    Body,
+    HttpCode,
+    HttpStatus,
+    UseGuards,
+    Request,
+} from '@nestjs/common';
 import { AuthService } from '../../business.logic/services/auth.service';
-import { CreateAuthDto } from '../dto/create-auth.dto';
-import { UpdateAuthDto } from '../dto/update-auth.dto';
+import { RegisterDto } from '../dto/register.dto';
+import { LoginDto } from '../dto/login.dto';
+import { RefreshDto } from '../dto/refresh.dto';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
+    @Post('register')
+    register(@Body() dto: RegisterDto) {
+        return this.authService.register(dto);
+    }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
+    @Post('login')
+    @HttpCode(HttpStatus.OK)
+    login(@Body() dto: LoginDto) {
+        return this.authService.login(dto);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+    @Post('refresh')
+    @HttpCode(HttpStatus.OK)
+    refresh(@Body() dto: RefreshDto) {
+        return this.authService.refresh(dto.refreshToken);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+    @Post('logout')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    logout(@Body() dto: RefreshDto) {
+        return this.authService.logout(dto.refreshToken);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Request() req: any) {
+        return this.authService.getProfile(req.user.id);
+    }
 }

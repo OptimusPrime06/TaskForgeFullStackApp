@@ -27,4 +27,9 @@ export class UserRepository implements IUserRepository {
     async findAllUsers(): Promise<User[]> {
         return this.typeOrmRepo.find({select: ['id', 'email', 'role', 'createdAt'],})
     }
+
+    async deleteUserWithId(userId: string): Promise<void> {
+        await this.typeOrmRepo.delete({id: userId});
+        return
+    }
 }

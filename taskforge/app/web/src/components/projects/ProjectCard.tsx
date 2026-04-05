@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { Project } from '../../api/projects.api';
 
 // Fallback images based on Project ID to simulate the mockup's beautiful variety
@@ -41,10 +42,13 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               {project.owner?.email || 'Owner'}
             </span>
           </div>
-          <button className="text-primary font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+          <Link 
+            to={`/projects/${project.id}`} 
+            className="text-primary font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all"
+          >
             View Board
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
+          </Link>
         </div>
       </div>
     </div>

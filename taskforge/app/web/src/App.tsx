@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProjectsPage from './pages/ProjectsPage';
+import TasksPage from './pages/TasksPage';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
@@ -27,6 +28,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects/:projectId" element={<TasksPage />} />
             
             {/* Nav placeholders */}
             <Route path="/dashboard" element={<Navigate to="/projects" replace />} />

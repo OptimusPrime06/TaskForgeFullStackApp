@@ -1,0 +1,29 @@
+import { apiClient } from './client';
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  ownerId: string;
+  createdAt: string;
+  owner?: {
+    id: string;
+    email: string;
+  };
+}
+
+export const projectsApi = {
+  fetchProjects: async (): Promise<Project[]> => {
+    // The interceptor automatically attaches the Bearer token
+    const response = await apiClient.get<Project[]>('/projects');
+    return response.data;
+  },
+
+  createProject: async (name: string, description?: string): Promise<Project> => {
+    const response = await apiClient.post<Project>('/projects', {
+      name,
+      description,
+    });
+    return response.data;
+  },
+};

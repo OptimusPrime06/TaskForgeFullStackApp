@@ -2,14 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProjectsPage from './pages/ProjectsPage';
 import { ProtectedRoute } from './guards/ProtectedRoute';
+import { DashboardLayout } from './components/layout/DashboardLayout';
 
 function App() {
   return (
     <BrowserRouter>
-      {/* 
-        The Toaster acts as our global notification hub.
-      */}
       <Toaster 
         position="top-right" 
         toastOptions={{
@@ -24,10 +23,18 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
-        {/* Protected Routes placeholder */}
+        {/* Protected Dashboard Area */}
         <Route element={<ProtectedRoute />}>
-          {/* We will build ProjectsPage in Phase 3 */}
-          <Route path="/projects" element={<div className="p-8 text-on_surface text-center mt-20 text-xl font-bold border rounded-lg bg-surface_container_lowest m-4">You have successfully Authenticated! Proceed to Phase 3.</div>} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/projects" element={<ProjectsPage />} />
+            
+            {/* Nav placeholders */}
+            <Route path="/dashboard" element={<Navigate to="/projects" replace />} />
+            <Route path="/timeline" element={<div className="p-8"><h2 className="text-3xl font-bold">Timeline Module</h2></div>} />
+            <Route path="/team" element={<div className="p-8"><h2 className="text-3xl font-bold">Team Module</h2></div>} />
+            <Route path="/reports" element={<div className="p-8"><h2 className="text-3xl font-bold">Reports Module</h2></div>} />
+            <Route path="/settings" element={<div className="p-8"><h2 className="text-3xl font-bold">Settings Module</h2></div>} />
+          </Route>
         </Route>
         
         {/* Fallback */}

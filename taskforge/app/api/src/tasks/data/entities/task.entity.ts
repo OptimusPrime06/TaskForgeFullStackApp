@@ -3,9 +3,9 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    JoinColumn
 } from 'typeorm';
 import { TaskStatus } from '@taskforge/shared';
 import { Project } from '../../../projects/data/entities/project.entity';
@@ -22,7 +22,11 @@ export class Task {
     @Column({ nullable: true })
     description: string;
 
-    @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.BACKLOG })
+    @Column({
+        type: 'enum',
+        enum: TaskStatus,
+        default: TaskStatus.TODO,
+    })
     status: TaskStatus;
 
     @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })

@@ -1,25 +1,37 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import { ProtectedRoute } from './guards/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
       {/* 
         The Toaster acts as our global notification hub.
-        We can style it later to match the Editorial aesthetics.
       */}
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          className: 'bg-surface_container_lowest text-on_surface border border-outline_variant',
+        }}
+      />
       
       <Routes>
         <Route path="/" element={<Navigate to="/projects" replace />} />
         
-        {/* Placeholder Routes for Phase 2/3 */}
-        <Route path="/login" element={<div className="p-8 text-on_surface">Login Page Placeholder</div>} />
-        <Route path="/register" element={<div className="p-8 text-on_surface">Register Page Placeholder</div>} />
-        <Route path="/projects" element={<div className="p-8 text-on_surface">Projects List Placeholder</div>} />
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Protected Routes placeholder */}
+        <Route element={<ProtectedRoute />}>
+          {/* We will build ProjectsPage in Phase 3 */}
+          <Route path="/projects" element={<div className="p-8 text-on_surface text-center mt-20 text-xl font-bold border rounded-lg bg-surface_container_lowest m-4">You have successfully Authenticated! Proceed to Phase 3.</div>} />
+        </Route>
         
         {/* Fallback */}
-        <Route path="*" element={<div className="p-8">404 Not Found</div>} />
+        <Route path="*" element={<div className="p-8 text-center mt-20 font-bold">404 Not Found</div>} />
       </Routes>
     </BrowserRouter>
   );

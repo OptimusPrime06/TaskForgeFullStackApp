@@ -8,7 +8,7 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true })); // Enabling class-validator pipes
 
-    app.enableCors({ origin: process.env.VITE_API_URL ?? 'http://localhost:5173' });
+    app.enableCors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173' });
 
     await app.listen(process.env.PORT ?? 4500);
 }

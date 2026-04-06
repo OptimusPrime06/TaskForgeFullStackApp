@@ -9,18 +9,22 @@ import {
   closestCorners
 } from '@dnd-kit/core';
 import { useTasks } from '../hooks/useTasks';
+import { useAuthStore } from '../stores/auth.store';
 import { TaskStatus } from '../api/tasks.api';
+import { Role } from '@taskforge/shared';
 import { KanbanColumn } from '../components/tasks/KanbanColumn';
 
 export default function TasksPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const { user } = useAuthStore();
   // We mock a project title for now since we don't have a single project fetch endpoint defined
   const projectTitle = "Editorial Platform Redesign"; 
   
-  const { tasks, isLoading, createTask, updateTaskStatus } = useTasks(projectId);
+  const { tasks, isLoading, createTask, updateTaskStatus, deleteTask, assignTask } = useTasks(projectId);
   const [isCreatingForStatus, setIsCreatingForStatus] = useState<TaskStatus | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [assigneeId, setAssigneeId] = useState<string>('');
 
   // Configure sensors for drag detection
   const sensors = useSensors(
@@ -52,14 +56,24 @@ export default function TasksPage() {
   const handleCreateTask = async () => {
     if (!newTaskTitle || !isCreatingForStatus) return;
     
-    // Currently, our createTask hook doesn't accept a status, it defaults to TODO on backend. 
-    // We create it, then if they hit "+" on a different column, we immediately patch it.
     const success = await createTask(newTaskTitle, newTaskDescription);
+    if (success && assigneeId) {
+      // Get the newly created task (should be the last one added)
+      const newTask = tasks[tasks.length - 1];
+      if (newTask) {
+        await assignTask(newTask.id, assigneeId);
+      }
+    }
     if (success) {
       setNewTaskTitle('');
       setNewTaskDescription('');
+      setAssigneeId('');
       setIsCreatingForStatus(null);
     }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
   };
 
   const columns = [
@@ -126,10 +140,28 @@ export default function TasksPage() {
                 className="w-full bg-surface_container_low border-none focus:ring-2 focus:ring-primary/40 rounded-xl py-3 px-4 text-sm text-on_surface placeholder:text-on_surface_variant/60 min-h-[100px] resize-none"
                 placeholder="Add a detailed description..."
               />
+              {(user?.role === Role.ADMIN || user?.role === Role.PROJECT_MANAGER) && (
+                <div>
+                  <label className="block text-sm font-semibold text-on_surface mb-2">Assign to (optional)</label>
+                  <select
+                    value={assigneeId}
+                    onChange={(e) => setAssigneeId(e.target.value)}
+                    className="w-full bg-surface_container_low border-none focus:ring-2 focus:ring-primary/40 rounded-xl py-3 px-4 text-on_surface"
+                  >
+                    <option value="">Unassigned</option>
+                    {/* TODO: Replace with actual project members fetched from backend */}
+                    <option value="demo-user-1">Demo User 1</option>
+                    <option value="demo-user-2">Demo User 2</option>
+                  </select>
+                </div>
+              )}
             </div>
             
             <div className="flex justify-end gap-3 mt-4">
-              <button disabled={isLoading} onClick={() => setIsCreatingForStatus(null)} className="px-5 py-2.5 bg-surface_container_high text-on_surface font-bold rounded-xl text-sm hover:bg-surface_container_highest transition-colors">Cancel</button>
+              <button disabled={isLoading} onClick={() => {
+                setIsCreatingForStatus(null);
+                setAssigneeId('');
+              }} className="px-5 py-2.5 bg-surface_container_high text-on_surface font-bold rounded-xl text-sm hover:bg-surface_container_highest transition-colors">Cancel</button>
               <button disabled={isLoading} onClick={handleCreateTask} className="px-5 py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary_container transition-colors disabled:opacity-50">Create Task</button>
             </div>
           </div>
@@ -152,6 +184,9 @@ export default function TasksPage() {
                 dotColor={col.dotColor}
                 tasks={tasks.filter(t => t.status === col.id)}
                 onAddTask={() => setIsCreatingForStatus(col.id)}
+                userRole={user?.role}
+                onDeleteTask={handleDeleteTask}
+                isDeleting={isLoading}
               />
             ))}
           </div>

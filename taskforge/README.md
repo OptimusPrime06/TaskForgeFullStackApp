@@ -415,9 +415,9 @@ npm run dev --workspace=@taskforge/web
 
 ---
 
-## 🐳 Docker Deployment
+## 🐳 Docker for Local Development
 
-### Production Deployment (Single Command)
+### Run Entire Stack with Docker (Single Command)
 
 ```bash
 cd taskforge
@@ -425,7 +425,7 @@ cd taskforge
 # 1. Copy environment template
 cp .env.example .env
 
-# 2. Edit with production values
+# 2. Edit with your local values
 nano .env
 
 # 3. Build and start all services
@@ -434,26 +434,16 @@ docker-compose up --build
 
 **What happens automatically:**
 1. PostgreSQL starts and initializes
-2. NestJS backend builds and starts
-3. React frontend builds and serves via Nginx
+2. NestJS backend builds and starts (watch mode for hot reload)
+3. React frontend starts with Vite dev server (hot reload enabled)
 4. Services connect via internal network
-5. Health checks verify all services running
 
 **Access points:**
-- **Frontend**: http://localhost (port 80, production build)
+- **Frontend**: http://localhost:5173 (Vite dev server with hot reload)
 - **API**: http://localhost:4500/api
 - **Database**: localhost:5432
 
-### Development with Docker (Hot Reload)
-
-```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
-
-**Features:**
-- Backend watch mode (restart on file change)
-- Frontend Vite dev server (hot reload)
-- Volume mounts for live code updates
+⚡ **Note**: Both backend and frontend watch for file changes and auto-reload without rebuilding containers!
 
 ### Useful Docker Commands
 

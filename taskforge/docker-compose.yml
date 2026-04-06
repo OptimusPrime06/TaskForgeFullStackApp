@@ -23,7 +23,7 @@ services:
     networks:
       - taskforge-network
 
-  # NestJS Backend API
+  # NestJS Backend API (Development - with watch mode)
   api:
     build:
       context: ./app/api
@@ -35,7 +35,7 @@ services:
     env_file:
       - .env
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: ${DB_USERNAME}
@@ -50,14 +50,12 @@ services:
       - "${PORT}:${PORT}"
     networks:
       - taskforge-network
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:${PORT}/api', (r) => {if (r.statusCode !== 404) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+    volumes:
+      - ./app/api/src:/app/src  # Hot reload - code changes trigger restart
+      - /app/node_modules  # Prevent node_modules from being overwritten
+      - /app/dist  # Cache dist directory
 
-  # React Frontend (Production - Built with Nginx)
+  # React Frontend (Development - Vite dev server with hot reload)
   web:
     build:
       context: ./app/web
@@ -66,17 +64,14 @@ services:
     depends_on:
       - api
     ports:
-      - "80:80"
+      - "5173:5173"
     networks:
       - taskforge-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+    volumes:
+      - ./app/web/src:/app/src  # Hot reload - code changes trigger refresh
+      - /app/node_modules  # Prevent node_modules from being overwritten
     environment:
-      VITE_API_URL: /api
+      VITE_API_URL: http://localhost:4500/api
 
 networks:
   taskforge-network:

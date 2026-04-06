@@ -28,6 +28,12 @@ export class ProjectRepository implements IProjectRepository {
         });
     }
 
+    async findAll(): Promise<Project[]> {
+        return this.typeOrmRepo.find({
+            relations: ['owner'],
+        });
+    }
+
     async findAllForUser(userId: string): Promise<Project[]> {
         return this.typeOrmRepo.find({
             where: {members: { id: userId }},

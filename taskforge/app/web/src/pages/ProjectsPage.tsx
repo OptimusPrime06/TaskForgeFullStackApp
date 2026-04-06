@@ -1,23 +1,37 @@
 import { useState } from 'react';
 import { useProjects } from '../hooks/useProjects';
+import { useUsers } from '../hooks/useUsers';
 import { ProjectCard } from '../components/projects/ProjectCard';
+import { MemberSelector } from '../components/projects/MemberSelector';
 import { useAuthStore } from '../stores/auth.store';
 import { Role } from '@taskforge/shared';
+import type { User } from '../api/users.api';
 
 export default function ProjectsPage() {
-  const { projects, isLoading, createProject, deleteProject } = useProjects();
+  const { projects, isLoading, createProject, deleteProject, addMembersToProject } = useProjects();
+  const { users } = useUsers();
   const { user } = useAuthStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [selectedMembers, setSelectedMembers] = useState<User[]>([]);
 
   const handleCreate = async () => {
     if (!newProjectName) return;
     const success = await createProject(newProjectName, newProjectDescription);
+    if (success && selectedMembers.length > 0) {
+      // Get the newly created project (it should be at the beginning of the list)
+      const newProject = projects[0];
+      if (newProject) {
+        const memberEmails = selectedMembers.map((m) => m.email);
+        await addMembersToProject(newProject.id, memberEmails);
+      }
+    }
     if (success) {
       setIsCreating(false);
       setNewProjectName('');
       setNewProjectDescription('');
+      setSelectedMembers([]);
     }
   };
 
@@ -72,6 +86,17 @@ export default function ProjectsPage() {
             placeholder="Enter project description (optional)..."
             rows={3}
           />
+          {(user?.role === Role.ADMIN || user?.role === Role.PROJECT_MANAGER) && (
+            <>
+              <label className="block text-sm font-semibold text-on_surface">Assign Members (optional)</label>
+              <MemberSelector
+                availableUsers={users}
+                selectedMembers={selectedMembers}
+                onMembersChange={setSelectedMembers}
+                isLoading={isLoading}
+              />
+            </>
+          )}
           <div className="flex items-center justify-end gap-3">
             <button 
               onClick={handleCreate}
@@ -83,6 +108,7 @@ export default function ProjectsPage() {
             <button onClick={() => {
               setIsCreating(false);
               setNewProjectDescription('');
+              setSelectedMembers([]);
             }} className="px-6 py-3 bg-transparent text-primary font-bold rounded-lg hover:bg-surface_container_highest">
               Cancel
             </button>

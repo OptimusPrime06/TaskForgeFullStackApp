@@ -11,7 +11,7 @@ import { EnvKeys } from './common/constants/env.keys';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,        
-      envFilePath: '../../../.env', 
+      envFilePath: '../../.env', 
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

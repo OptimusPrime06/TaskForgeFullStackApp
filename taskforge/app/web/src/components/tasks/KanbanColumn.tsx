@@ -21,7 +21,7 @@ export const KanbanColumn = ({ id, title, tasks, dotColor, onAddTask }: KanbanCo
   });
 
   return (
-    <div className="flex-none w-80 flex flex-col h-full max-h-full">
+    <div className="flex flex-col h-full max-h-full">
       <div className="flex items-center justify-between mb-4 px-2 shrink-0">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>

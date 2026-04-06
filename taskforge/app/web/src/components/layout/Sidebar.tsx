@@ -49,10 +49,6 @@ export const Sidebar = () => {
       </nav>
 
       <div className="mt-auto space-y-1 pt-6 border-t border-outline_variant/20">
-        <button className="w-full mb-4 py-3 px-4 bg-gradient-to-r from-primary to-primary_container text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform">
-          <span className="material-symbols-outlined">add</span>
-          <span>New Project</span>
-        </button>
         <NavLink to="/settings" className={navClass}>
           <span className="material-symbols-outlined">settings</span>
           <span>Settings</span>

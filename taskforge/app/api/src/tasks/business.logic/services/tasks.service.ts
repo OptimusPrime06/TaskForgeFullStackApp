@@ -110,7 +110,7 @@ export class TasksService {
         const isProjectManager: boolean = this.isProjectManager(dto.role);
         const projectIsOwned: boolean = this.projectIsOwned(dto.userId, project.ownerId);
 
-        if (!isAdmin || (isProjectManager && projectIsOwned)) {
+        if (isAdmin || (isProjectManager && projectIsOwned)) {
             return this.taskRepository.updateStatus(taskId, newStatus);
         }
 

@@ -1,7 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { type Task, TaskStatus } from '../../api/tasks.api';
-import { Role } from '@taskforge/shared';
 
 interface TaskCardProps {
   task: Task;

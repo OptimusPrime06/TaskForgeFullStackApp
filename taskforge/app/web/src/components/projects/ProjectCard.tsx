@@ -13,12 +13,27 @@ const getPlaceholderImage = (id: string) => {
 
 interface ProjectCardProps {
   project: Project;
+  canDelete?: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export const ProjectCard = ({ project }: ProjectCardProps) => {
+export const ProjectCard = ({ project, canDelete, onDelete }: ProjectCardProps) => {
   return (
     <div className="bg-surface_container_lowest rounded-[1.5rem] p-6 group transition-all hover:bg-surface_bright relative overflow-hidden shadow-sm hover:shadow-md">
-      <div className="mb-6 h-32 rounded-xl overflow-hidden">
+      {canDelete && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete?.(project.id);
+          }}
+          className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-error text-white p-2 rounded-lg hover:bg-error/90"
+          title="Delete project"
+        >
+          <span className="material-symbols-outlined text-lg">delete</span>
+        </button>
+      )}
+      <div className="mb-6 h-32 rounded-xl overflow-hidden relative">
         <img 
           alt="Project cover" 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 

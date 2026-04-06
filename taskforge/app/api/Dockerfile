@@ -1,16 +1,19 @@
 # Development stage - NestJS dev server with watch mode
 FROM node:20-alpine
 
+# Copy shared package so it is accessible at /packages/shared
+COPY packages/shared /packages/shared
+
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY app/api/package*.json ./
 
 # Install all dependencies (including dev)
 RUN npm ci
 
 # Copy source code
-COPY . .
+COPY app/api .
 
 # Expose API port
 EXPOSE 4500

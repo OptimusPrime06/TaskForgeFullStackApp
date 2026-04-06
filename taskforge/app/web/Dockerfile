@@ -1,16 +1,19 @@
 # Development stage - Vite dev server
 FROM node:20-alpine
 
+# Copy shared package so it is accessible at /packages/shared
+COPY packages/shared /packages/shared
+
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY app/web/package*.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy source code
-COPY . .
+COPY app/web .
 
 # Expose Vite dev server port
 EXPOSE 5173

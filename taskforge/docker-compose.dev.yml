@@ -26,8 +26,8 @@ services:
   # NestJS Backend API (Development - with file watching)
   api:
     build:
-      context: ./app/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./app/api/Dockerfile
     container_name: taskforge-api-dev
     depends_on:
       db:
@@ -36,11 +36,11 @@ services:
       - .env
     environment:
       NODE_ENV: development
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DB_USERNAME}
-      DATABASE_PASSWORD: ${DB_PASSWORD}
-      DATABASE_NAME: ${DB_NAME}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -50,6 +50,7 @@ services:
       - "${PORT}:${PORT}"
     volumes:
       - ./app/api/src:/app/src  # Hot reload - changes trigger rebuild
+      - ./packages/shared:/packages/shared  # Hot reload shared package
       - ./app/api/dist:/app/dist
     networks:
       - taskforge-network-dev
@@ -71,6 +72,7 @@ services:
       - "5173:5173"  # Vite default dev port
     volumes:
       - ./app/web:/app
+      - ./packages/shared:/packages/shared  # Hot reload shared package
       - /app/node_modules  # Prevent node_modules from being overwritten
     networks:
       - taskforge-network-dev

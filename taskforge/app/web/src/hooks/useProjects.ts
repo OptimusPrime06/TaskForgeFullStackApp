@@ -37,11 +37,23 @@ export const useProjects = (autoFetch = true) => {
     }
   };
 
+  const deleteProject = async (id: string) => {
+    try {
+      await projectsApi.deleteProject(id);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Project deleted');
+      return true;
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete project');
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (autoFetch) {
       fetchProjects();
     }
   }, [autoFetch, fetchProjects]);
 
-  return { projects, isLoading, error, fetchProjects, createProject };
+  return { projects, isLoading, error, fetchProjects, createProject, deleteProject };
 };

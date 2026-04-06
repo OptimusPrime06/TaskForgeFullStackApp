@@ -26,4 +26,8 @@ export const projectsApi = {
     });
     return response.data;
   },
+
+  deleteProject: async (id: string): Promise<void> => {
+    await apiClient.delete(`/projects/${id}`);
+  },
 };

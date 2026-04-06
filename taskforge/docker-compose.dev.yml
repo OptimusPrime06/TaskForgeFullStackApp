@@ -1,0 +1,85 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: taskforge-db-dev
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taskforge-network-dev
+
+  # NestJS Backend API (Development - with file watching)
+  api:
+    build:
+      context: ./app/api
+      dockerfile: Dockerfile
+    container_name: taskforge-api-dev
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${DB_USERNAME}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      DATABASE_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+      API_PORT: ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./app/api/src:/app/src  # Hot reload - changes trigger rebuild
+      - ./app/api/dist:/app/dist
+    networks:
+      - taskforge-network-dev
+    command: npm run start:dev  # Use dev mode with watch
+
+  # React Frontend (Development - Vite dev server with hot reload)
+  web:
+    image: node:20-alpine
+    container_name: taskforge-web-dev
+    working_dir: /app
+    depends_on:
+      - api
+    env_file:
+      - .env
+    environment:
+      # Vite frontend development environment
+      VITE_API_URL: http://localhost:${PORT}/api
+    ports:
+      - "5173:5173"  # Vite default dev port
+    volumes:
+      - ./app/web:/app
+      - /app/node_modules  # Prevent node_modules from being overwritten
+    networks:
+      - taskforge-network-dev
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"  # Run Vite dev server accessible from host
+
+networks:
+  taskforge-network-dev:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+    driver: local

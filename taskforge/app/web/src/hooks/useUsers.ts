@@ -7,7 +7,26 @@ export const useUsers = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await usersApi.fetchAllUsers();
+        setUsers(data.sort((a, b) => a.email.localeCompare(b.email)));
+      } catch (err: any) {
+        const msg = err.response?.data?.message || 'Failed to load users';
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const refetchUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -22,9 +41,5 @@ export const useUsers = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  return { users, isLoading, error, fetchUsers };
+  return { users, isLoading, error, refetchUsers };
 };

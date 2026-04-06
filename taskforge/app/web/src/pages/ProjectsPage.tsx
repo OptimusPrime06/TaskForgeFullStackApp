@@ -1,19 +1,42 @@
 import { useState } from 'react';
 import { useProjects } from '../hooks/useProjects';
 import { ProjectCard } from '../components/projects/ProjectCard';
+import { useAuthStore } from '../stores/auth.store';
+import { Role } from '@taskforge/shared';
 
 export default function ProjectsPage() {
-  const { projects, isLoading, createProject } = useProjects();
+  const { projects, isLoading, createProject, deleteProject } = useProjects();
+  const { user } = useAuthStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDescription, setNewProjectDescription] = useState('');
 
   const handleCreate = async () => {
     if (!newProjectName) return;
-    const success = await createProject(newProjectName);
+    const success = await createProject(newProjectName, newProjectDescription);
     if (success) {
       setIsCreating(false);
       setNewProjectName('');
+      setNewProjectDescription('');
     }
+  };
+
+  const handleDelete = async (projectId: string) => {
+    if (confirm('Are you sure you want to delete this project?')) {
+      await deleteProject(projectId);
+    }
+  };
+
+  const canDeleteProject = (projectId: string) => {
+    if (!user) return false;
+    // Admins can delete any project
+    if (user.role === Role.ADMIN) return true;
+    // Project managers can delete their own projects
+    if (user.role === Role.PROJECT_MANAGER) {
+      const project = projects.find((p) => p.id === projectId);
+      return project?.ownerId === user.id;
+    }
+    return false;
   };
 
   return (
@@ -34,24 +57,36 @@ export default function ProjectsPage() {
       </div>
 
       {isCreating && (
-        <div className="mb-10 bg-surface_container_low p-6 rounded-2xl flex items-center gap-4 border border-outline_variant/30">
+        <div className="mb-10 bg-surface_container_low p-6 rounded-2xl space-y-4 border border-outline_variant/30">
           <input 
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
-            className="flex-1 bg-surface_container_lowest border-none focus:ring-2 focus:ring-primary/40 rounded-lg py-3 px-4 transition-all text-on_surface placeholder:text-on_surface_variant/60" 
+            className="w-full bg-surface_container_lowest border-none focus:ring-2 focus:ring-primary/40 rounded-lg py-3 px-4 transition-all text-on_surface placeholder:text-on_surface_variant/60" 
             placeholder="Enter project name..."
             autoFocus
           />
-          <button 
-            onClick={handleCreate}
-            disabled={isLoading}
-            className="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary_container disabled:opacity-50"
-          >
-            {isLoading ? 'Creating...' : 'Save'}
-          </button>
-          <button onClick={() => setIsCreating(false)} className="px-6 py-3 bg-transparent text-primary font-bold rounded-lg hover:bg-surface_container_highest">
-            Cancel
-          </button>
+          <textarea
+            value={newProjectDescription}
+            onChange={(e) => setNewProjectDescription(e.target.value)}
+            className="w-full bg-surface_container_lowest border-none focus:ring-2 focus:ring-primary/40 rounded-lg py-3 px-4 transition-all text-on_surface placeholder:text-on_surface_variant/60 resize-none"
+            placeholder="Enter project description (optional)..."
+            rows={3}
+          />
+          <div className="flex items-center justify-end gap-3">
+            <button 
+              onClick={handleCreate}
+              disabled={isLoading}
+              className="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary_container disabled:opacity-50"
+            >
+              {isLoading ? 'Creating...' : 'Save'}
+            </button>
+            <button onClick={() => {
+              setIsCreating(false);
+              setNewProjectDescription('');
+            }} className="px-6 py-3 bg-transparent text-primary font-bold rounded-lg hover:bg-surface_container_highest">
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
@@ -65,7 +100,18 @@ export default function ProjectsPage() {
       ) : projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((proj) => (
-            <ProjectCard key={proj.id} project={proj} />
+            <div key={proj.id} className="relative group">
+              <ProjectCard project={proj} />
+              {canDeleteProject(proj.id) && (
+                <button
+                  onClick={() => handleDelete(proj.id)}
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-error text-white p-2 rounded-lg hover:bg-error/90"
+                  title="Delete project"
+                >
+                  <span className="material-symbols-outlined text-lg">delete</span>
+                </button>
+              )}
+            </div>
           ))}
         </div>
       ) : (

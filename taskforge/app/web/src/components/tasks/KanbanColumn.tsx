@@ -2,6 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { type Task, TaskStatus } from '../../api/tasks.api';
 import { TaskCard } from './TaskCard';
+import { Role } from '@taskforge/shared';
 
 interface KanbanColumnProps {
   id: TaskStatus;
@@ -9,9 +10,21 @@ interface KanbanColumnProps {
   tasks: Task[];
   dotColor: string;
   onAddTask: () => void;
+  userRole?: string;
+  onDeleteTask?: (taskId: string) => void;
+  isDeleting?: boolean;
 }
 
-export const KanbanColumn = ({ id, title, tasks, dotColor, onAddTask }: KanbanColumnProps) => {
+export const KanbanColumn = ({ 
+  id, 
+  title, 
+  tasks, 
+  dotColor, 
+  onAddTask,
+  userRole,
+  onDeleteTask,
+  isDeleting = false 
+}: KanbanColumnProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: {
@@ -19,6 +32,8 @@ export const KanbanColumn = ({ id, title, tasks, dotColor, onAddTask }: KanbanCo
       columnId: id,
     },
   });
+
+  const canDeleteTasks = userRole === Role.ADMIN || userRole === Role.PROJECT_MANAGER;
 
   return (
     <div className="flex flex-col h-full max-h-full">
@@ -43,7 +58,13 @@ export const KanbanColumn = ({ id, title, tasks, dotColor, onAddTask }: KanbanCo
       >
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map(task => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard 
+              key={task.id} 
+              task={task}
+              canDelete={canDeleteTasks}
+              onDelete={onDeleteTask}
+              isDeleting={isDeleting}
+            />
           ))}
         </SortableContext>
         

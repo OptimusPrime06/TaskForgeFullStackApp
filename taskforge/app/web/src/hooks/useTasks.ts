@@ -54,11 +54,43 @@ export const useTasks = (projectId: string | undefined) => {
     }
   };
 
+  const deleteTask = async (taskId: string) => {
+    if (!projectId) return false;
+    // Optimistic UI Update
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    
+    try {
+      await tasksApi.deleteTask(projectId, taskId);
+      toast.success('Task deleted successfully');
+      return true;
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete task');
+      // Revert if API fails
+      fetchTasks();
+      return false;
+    }
+  };
+
+  const assignTask = async (taskId: string, assigneeId: string) => {
+    if (!projectId) return false;
+    try {
+      const updatedTask = await tasksApi.assignTask(projectId, taskId, assigneeId);
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? updatedTask : t))
+      );
+      toast.success('Task assigned successfully');
+      return true;
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to assign task');
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (projectId) {
       fetchTasks();
     }
   }, [projectId, fetchTasks]);
 
-  return { tasks, isLoading, error, fetchTasks, createTask, updateTaskStatus };
+  return { tasks, isLoading, error, fetchTasks, createTask, updateTaskStatus, deleteTask, assignTask };
 };

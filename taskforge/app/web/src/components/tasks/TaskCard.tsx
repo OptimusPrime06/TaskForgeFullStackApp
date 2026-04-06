@@ -1,12 +1,16 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { type Task, TaskStatus } from '../../api/tasks.api';
+import { Role } from '@taskforge/shared';
 
 interface TaskCardProps {
   task: Task;
+  canDelete?: boolean;
+  onDelete?: (taskId: string) => void;
+  isDeleting?: boolean;
 }
 
-export const TaskCard = ({ task }: TaskCardProps) => {
+export const TaskCard = ({ task, canDelete = false, onDelete, isDeleting = false }: TaskCardProps) => {
   const {
     attributes,
     listeners,
@@ -45,10 +49,27 @@ export const TaskCard = ({ task }: TaskCardProps) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-surface_container_lowest p-4 rounded-xl group hover:shadow-xl hover:shadow-on_surface/5 transition-all duration-300 cursor-grab active:cursor-grabbing ${
+      className={`bg-surface_container_lowest p-4 rounded-xl group hover:shadow-xl hover:shadow-on_surface/5 transition-all duration-300 cursor-grab active:cursor-grabbing relative ${
         isDragging ? 'opacity-50 ring-2 ring-primary scale-105' : ''
       }`}
     >
+      {/* Delete Button */}
+      {canDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm('Are you sure you want to delete this task?')) {
+              onDelete?.(task.id);
+            }
+          }}
+          disabled={isDeleting}
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-error text-white p-1.5 rounded hover:bg-error/90 disabled:opacity-50"
+          title="Delete task"
+        >
+          <span className="material-symbols-outlined text-base">delete</span>
+        </button>
+      )}
+
       <div className="flex justify-between items-start mb-3">
         <span className={`${badge.bg} ${badge.text} px-2 py-0.5 rounded text-[10px] font-bold`}>
           {badge.label}

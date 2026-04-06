@@ -26,8 +26,8 @@ services:
   # NestJS Backend API (Development - with watch mode)
   api:
     build:
-      context: ./app/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./app/api/Dockerfile
     container_name: taskforge-api
     depends_on:
       db:
@@ -36,11 +36,11 @@ services:
       - .env
     environment:
       NODE_ENV: development
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DB_USERNAME}
-      DATABASE_PASSWORD: ${DB_PASSWORD}
-      DATABASE_NAME: ${DB_NAME}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -52,14 +52,15 @@ services:
       - taskforge-network
     volumes:
       - ./app/api/src:/app/src  # Hot reload - code changes trigger restart
+      - ./packages/shared:/packages/shared  # Hot reload shared package
       - /app/node_modules  # Prevent node_modules from being overwritten
-      - /app/dist  # Cache dist directory
+      #- /app/dist  # Cache dist directory
 
   # React Frontend (Development - Vite dev server with hot reload)
   web:
     build:
-      context: ./app/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./app/web/Dockerfile
     container_name: taskforge-web
     depends_on:
       - api
@@ -69,6 +70,7 @@ services:
       - taskforge-network
     volumes:
       - ./app/web/src:/app/src  # Hot reload - code changes trigger refresh
+      - ./packages/shared:/packages/shared  # Hot reload shared package
       - /app/node_modules  # Prevent node_modules from being overwritten
     environment:
       VITE_API_URL: http://localhost:4500/api

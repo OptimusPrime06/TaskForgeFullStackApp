@@ -130,16 +130,11 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((proj) => (
             <div key={proj.id} className="relative group">
-              <ProjectCard project={proj} />
-              {canDeleteProject(proj.id) && (
-                <button
-                  onClick={() => handleDelete(proj.id)}
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-error text-white p-2 rounded-lg hover:bg-error/90"
-                  title="Delete project"
-                >
-                  <span className="material-symbols-outlined text-lg">delete</span>
-                </button>
-              )}
+              <ProjectCard 
+                project={proj} 
+                canDelete={canDeleteProject(proj.id)} 
+                onDelete={handleDelete} 
+              />
             </div>
           ))}
         </div>

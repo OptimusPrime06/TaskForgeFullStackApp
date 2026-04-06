@@ -49,11 +49,26 @@ export const useProjects = (autoFetch = true) => {
     }
   };
 
+  const addMembersToProject = async (projectId: string, memberEmails: string[]) => {
+    try {
+      for (const email of memberEmails) {
+        await projectsApi.addMember(projectId, email);
+      }
+      if (memberEmails.length > 0) {
+        toast.success(`Added ${memberEmails.length} member(s) to project`);
+      }
+      return true;
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to add members to project');
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (autoFetch) {
       fetchProjects();
     }
   }, [autoFetch, fetchProjects]);
 
-  return { projects, isLoading, error, fetchProjects, createProject, deleteProject };
+  return { projects, isLoading, error, fetchProjects, createProject, deleteProject, addMembersToProject };
 };

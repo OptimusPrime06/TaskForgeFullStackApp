@@ -30,4 +30,12 @@ export const projectsApi = {
   deleteProject: async (id: string): Promise<void> => {
     await apiClient.delete(`/projects/${id}`);
   },
+
+  addMember: async (projectId: string, memberEmail: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      `/projects/${projectId}/members`,
+      { email: memberEmail }
+    );
+    return response.data;
+  },
 };

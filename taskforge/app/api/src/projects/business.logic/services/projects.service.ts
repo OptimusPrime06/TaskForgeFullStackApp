@@ -23,6 +23,9 @@ export class ProjectsService {
   }
 
   async findAllForUser(userId: string, role: string) {
+    if (role === Role.ADMIN) {
+      return await this.projectRepository.findAll();
+    }
     return await this.projectRepository.findAllForUser(userId);
   }
 

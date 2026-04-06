@@ -20,6 +20,7 @@ export default function TasksPage() {
   const { tasks, isLoading, createTask, updateTaskStatus } = useTasks(projectId);
   const [isCreatingForStatus, setIsCreatingForStatus] = useState<TaskStatus | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
 
   // Configure sensors for drag detection
   const sensors = useSensors(
@@ -53,9 +54,10 @@ export default function TasksPage() {
     
     // Currently, our createTask hook doesn't accept a status, it defaults to TODO on backend. 
     // We create it, then if they hit "+" on a different column, we immediately patch it.
-    const success = await createTask(newTaskTitle);
+    const success = await createTask(newTaskTitle, newTaskDescription);
     if (success) {
       setNewTaskTitle('');
+      setNewTaskDescription('');
       setIsCreatingForStatus(null);
     }
   };
@@ -105,38 +107,54 @@ export default function TasksPage() {
       </div>
 
       {isCreatingForStatus && (
-        <div className="mx-8 mb-4 bg-surface_container_low p-4 rounded-xl flex items-center gap-4 border border-outline_variant/30 shrink-0">
-           <span className="text-xs font-bold text-on_surface_variant">New task in <span className="text-primary">{isCreatingForStatus}</span></span>
-           <input 
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
-            className="flex-1 bg-surface_container_lowest border-none focus:ring-2 focus:ring-primary/40 rounded-lg py-2 px-4 text-sm transition-all text-on_surface placeholder:text-on_surface_variant/60" 
-            placeholder="What needs to be done?"
-            autoFocus
-          />
-          <button onClick={handleCreateTask} className="px-4 py-2 bg-primary text-white font-bold rounded-lg text-sm hover:bg-primary_container">Save</button>
-          <button onClick={() => setIsCreatingForStatus(null)} className="px-4 py-2 bg-transparent text-primary font-bold rounded-lg text-sm hover:bg-surface_container_highest">Cancel</button>
+        <div className="absolute inset-0 z-50 bg-on_surface/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-surface_container_lowest w-full max-w-lg p-6 rounded-3xl shadow-2xl border border-outline_variant/30 flex flex-col gap-4">
+            <h3 className="text-xl font-bold text-on_surface mb-2">Create Task in <span className="text-primary">{isCreatingForStatus}</span></h3>
+            
+            <div className="space-y-4">
+              <input 
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
+                className="w-full bg-surface_container_low border-none focus:ring-2 focus:ring-primary/40 rounded-xl py-3 px-4 text-on_surface placeholder:text-on_surface_variant/60 font-semibold" 
+                placeholder="Give your task a snappy title..."
+                autoFocus
+              />
+              <textarea
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                className="w-full bg-surface_container_low border-none focus:ring-2 focus:ring-primary/40 rounded-xl py-3 px-4 text-sm text-on_surface placeholder:text-on_surface_variant/60 min-h-[100px] resize-none"
+                placeholder="Add a detailed description..."
+              />
+            </div>
+            
+            <div className="flex justify-end gap-3 mt-4">
+              <button disabled={isLoading} onClick={() => setIsCreatingForStatus(null)} className="px-5 py-2.5 bg-surface_container_high text-on_surface font-bold rounded-xl text-sm hover:bg-surface_container_highest transition-colors">Cancel</button>
+              <button disabled={isLoading} onClick={handleCreateTask} className="px-5 py-2.5 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary_container transition-colors disabled:opacity-50">Create Task</button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Kanban Board Container */}
-      <div className="flex-1 overflow-x-auto px-8 pb-8 flex gap-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar relative">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragEnd={handleDragEnd}
         >
-          {columns.map(col => (
-            <KanbanColumn
-              key={col.id}
-              id={col.id}
-              title={col.title}
-              dotColor={col.dotColor}
-              tasks={tasks.filter(t => t.status === col.id)}
-              onAddTask={() => setIsCreatingForStatus(col.id)}
-            />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[450px]">
+            {columns.map(col => (
+              <KanbanColumn
+                key={col.id}
+                id={col.id}
+                title={col.title}
+                dotColor={col.dotColor}
+                tasks={tasks.filter(t => t.status === col.id)}
+                onAddTask={() => setIsCreatingForStatus(col.id)}
+              />
+            ))}
+          </div>
         </DndContext>
       </div>
     </div>

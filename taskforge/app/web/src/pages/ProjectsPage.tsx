@@ -53,6 +53,9 @@ export default function ProjectsPage() {
     return false;
   };
 
+  const canCreateProject = user?.role === Role.ADMIN || user?.role === Role.PROJECT_MANAGER;
+  const isNonMemberWithoutProjects = !canCreateProject && projects.length === 0;
+
   return (
     <div className="p-8 max-w-7xl w-full mx-auto">
       {/* Page Header Area */}
@@ -61,16 +64,18 @@ export default function ProjectsPage() {
           <h2 className="text-[2.75rem] font-black text-on_surface tracking-tighter leading-tight">Projects</h2>
           <p className="text-on_surface_variant mt-1 text-lg">Manage your architectural engineering tasks and team workflow.</p>
         </div>
-        <button 
-          onClick={() => setIsCreating(!isCreating)}
-          className="bg-gradient-to-br from-primary to-primary_container text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95"
-        >
-          <span className="material-symbols-outlined">add_circle</span>
-          New Project
-        </button>
+        {canCreateProject && (
+          <button 
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-gradient-to-br from-primary to-primary_container text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95"
+          >
+            <span className="material-symbols-outlined">add_circle</span>
+            New Project
+          </button>
+        )}
       </div>
 
-      {isCreating && (
+      {isCreating && canCreateProject && (
         <div className="mb-10 bg-surface_container_low p-6 rounded-2xl space-y-4 border border-outline_variant/30">
           <input 
             value={newProjectName}
@@ -116,8 +121,6 @@ export default function ProjectsPage() {
         </div>
       )}
 
-
-
       {/* Project Cards Grid */}
       {isLoading && projects.length === 0 ? (
         <div className="flex justify-center p-12">
@@ -139,6 +142,14 @@ export default function ProjectsPage() {
               )}
             </div>
           ))}
+        </div>
+      ) : isNonMemberWithoutProjects ? (
+        <div className="bg-surface_container_low rounded-[2.5rem] p-16 border-2 border-dashed border-outline_variant/30 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-8">
+            <span className="material-symbols-outlined text-primary_container text-5xl">lock</span>
+          </div>
+          <h5 className="text-3xl font-black text-on_surface mb-3">You are not a member of any project</h5>
+          <p className="text-on_surface_variant max-w-md mx-auto text-lg">Contact an admin or project manager to be added to a project so you can start collaborating on tasks.</p>
         </div>
       ) : (
         <div className="bg-surface_container_low rounded-[2.5rem] p-12 border-2 border-dashed border-outline_variant/30 flex flex-col items-center justify-center text-center">

@@ -42,5 +42,13 @@ export const tasksApi = {
 
   deleteTask: async (projectId: string, taskId: string): Promise<void> => {
     await apiClient.delete(`/projects/${projectId}/tasks/${taskId}`);
-  }
+  },
+
+  assignTask: async (projectId: string, taskId: string, assigneeId: string): Promise<Task> => {
+    const response = await apiClient.patch<{ message: string, response: Task }>(
+      `/projects/${projectId}/tasks/${taskId}/assign`,
+      { assigneeId }
+    );
+    return response.data.response;
+  },
 };
